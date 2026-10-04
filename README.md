@@ -58,31 +58,35 @@ The Computer Science and Engineering (CSE) zone consists of:
 - `CSE_AKC Seminar Hall`
 - `CSE Reflexon Room`
 
-### Architectural Rules
-1. **Entry Protocol:** To access any CSE location, an agent coming from outside **must** follow:
-   ```
-   Tower 2 Front/Rear Entry -> Lift Area -> CSE Locations
-   ```
-2. **Isolation Invariant:** Once `Lift Area` has been crossed during entry, **only CSE-labelled locations may be visited** until the agent returns to the `Lift Area`. (e.g., transitions like `Lift Area -> CSE Laboratory -> GardenArea` are strictly invalid).
-3. **Exit Protocol:** Leaving the CSE zone requires executing the reverse traversal:
-   ```
-   CSE Locations -> Lift Area -> Tower 2 Front/Rear Entry -> Other Campus Locations
-   ```
-   *(Note: Direct exterior transitions from `Lift Area` to other locations like `Library` are forbidden when exiting from the CSE zone).*
+### Rules
 
-### State-Space Modeling
-To enforce this constraint in standard graph search without cycle bugs, each search state is modeled as a tuple:
-
-```python
-state = (node, zone_state)
+**To enter a CSE-labelled location, the route must follow:**
+```
+Tower 2 Front/Rear Entry
+       ↓
+   Lift Area
+       ↓
+CSE-labelled locations
 ```
 
-Where `zone_state` can be:
-- `"NORMAL"`: Agent is in general campus areas.
-- `"CSE"`: Agent has entered via Lift Area and is inside the CSE zone.
-- `"LEAVING_CSE"`: Agent is returning to Lift Area and must exit through a Tower 2 entry before visiting general campus locations.
+Once the Lift Area has been crossed during entry, only CSE-labelled locations may be visited until the agent returns to the Lift Area.
 
-Valid transitions are governed by `allowed_move()` and `update_state()` inside `campus_map.py`.
+**For exiting, the reverse rule applies:**
+```
+CSE-labelled locations
+       ↓
+   Lift Area
+       ↓
+Tower 2 Front/Rear Entry
+       ↓
+Other campus locations
+```
+
+Therefore, a route such as:
+```
+Lift Area -> CSE Laboratory -> Garden Area -> Library
+```
+is **invalid**, because Garden Area and Library are not CSE-labelled locations. The search algorithm considers this rule when generating valid neighboring states.
 
 ---
 
